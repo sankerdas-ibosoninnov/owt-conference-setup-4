@@ -47,7 +47,24 @@ const runSocketIOSample = function() {
 
     var subscribeForward = getParameterByName('forward') === 'true'?true:false;
     var isSelf = getParameterByName('self') === 'false'?false:true;
-    conference = new Owt.Conference.ConferenceClient();
+    conference = new Owt.Conference.ConferenceClient(
+        {
+            audioEncodings: true,
+            videoEncodings: [{codec:{name: 'h264'}}, {codec: {name: 'vp9'}}, {codec: {name: 'vp8'}}],
+            rtcConfiguration:{
+              iceServers: [{
+                urls: "stun:stun.l.google.com:19302" // STUN
+              }, {
+                urls: [
+                    "turn:xrmeet.app:3478", // TURN UDP
+                    "turn:xrmeet.app:3478?transport=tcp" // TURN TCP
+                ],
+                credential: "1bnw3brtc", // Password
+                username: "ibnwebrtc" // user name
+              }]
+            },
+        }
+    );
     function createResolutionButtons(stream, subscribeResolutionCallback) {
         let $p = $(`#${stream.id}resolutions`);
         if ($p.length === 0) {
@@ -132,15 +149,16 @@ const runSocketIOSample = function() {
 
 
     window.onload = function() {
-        var simulcast = getParameterByName('simulcast') || false;
+        var simulcast = getParameterByName('simulcast') || false; // true;
         var shareScreen = getParameterByName('screen') || false;
         myRoom = getParameterByName('room');
         var isHttps = (location.protocol === 'https:');
         var mediaUrl = getParameterByName('url');
-        var isPublish = getParameterByName('publish');
+        var isPublish =  getParameterByName('publish');
         createToken(myRoom, 'user', 'presenter', function(response) {
             var token = response;
             conference.join(token).then(resp => {
+                console.log('conference.join(token)')
                 myId = resp.self.id;
                 myRoom = resp.id;
                 if(mediaUrl){
@@ -162,25 +180,31 @@ const runSocketIOSample = function() {
                     Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(
                         audioConstraints, videoConstraints)).then(stream => {
                         let publishOption;
-                        if (simulcast) {
+                        if (true) {
                             publishOption = {video:[
-                                {rid: 'q', active: true/*, scaleResolutionDownBy: 4.0*/},
-                                {rid: 'h', active: true/*, scaleResolutionDownBy: 2.0*/},
-                                {rid: 'f', active: true}
+                                {rid: 'q', active: true, scaleResolutionDownBy: 4.0},
+                                {rid: 'h', active: true, scaleResolutionDownBy: 2.0},
+                                {rid: 'f', active: true, scaleResolutionDownBy: 1.0}
                             ]};
                         }
                         mediaStream = stream;
+                        const codecs = ['vp8', 'h264'];
                         localStream = new Owt.Base.LocalStream(
                             mediaStream, new Owt.Base.StreamSourceInfo(
                                 'mic', 'camera'));
                         $('.local video').get(0).srcObject = stream;
-                        conference.publish(localStream, publishOption).then(publication => {
+                        console.log(mediaStream, localStream);
+                        conference.publish(localStream, publishOption, codecs).then(publication => {
+                            console.log('pubbbbbbbbbbbbbb')
                             publicationGlobal = publication;
                             mixStream(myRoom, publication.id, 'common')
                             publication.addEventListener('error', (err) => {
                                 console.log('Publication error: ' + err.error.message);
                             });
-                        });
+                        },  err => {
+                                console.error('ERROR during publish ' +
+                                    err);
+                            });
                     }, err => {
                         console.error('Failed to create MediaStream, ' +
                             err);
@@ -188,6 +212,7 @@ const runSocketIOSample = function() {
                 }
                 var streams = resp.remoteStreams;
                 for (const stream of streams) {
+                    console.log('stream loop', stream);
                     if(!subscribeForward){
                       if (stream.source.audio === 'mixed' || stream.source.video ===
                         'mixed') {

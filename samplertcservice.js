@@ -63,7 +63,10 @@ app.use(function(req, res, next) {
   }
 });
 
-icsREST.API.init('_service_ID_', '_service_KEY_', 'https://localhost:3000/', false);
+// icsREST.API.init('_service_ID_', '_service_KEY_', 'https://localhost:3000/', false);
+// icsREST.API.init('_service_ID_', '_service_KEY_', 'https://localhost:3001/', false);
+icsREST.API.init('5f69d9cfd1b0a11a7bf1402e', 'ow+Sm9U13Au5ysgi6yu82zkCCFsn8F+vcXQGJlsCsXpMEcLaNzp2ZSDs9JPpVElK6tbaHXQB8eTYBAEyAnzdutv2JHg4JauIDBfysKOuWGTUlm8FpDupK6gggSZ64GXc0bNGLjhOGEMqZb/OUuVho4zVBt77OWQHajxe1LDR4hc=', 'https://xrmeet.app:3300/', false);
+
 
 var sampleRoom;
 var pageOption = { page: 1, per_page: 100 };
@@ -128,6 +131,7 @@ app.post('/createToken/', function(req, res) {
   var preference = {isp: 'isp', region: 'region'};
   icsREST.API.createToken(room, username, role, preference, function(token) {
     res.send(token);
+    console.log('/createToken/');
   }, function(err) {
     res.send(err);
   });
@@ -521,11 +525,13 @@ app.post('/tokens', function(req, res) {
   var room = req.body.room || sampleRoom,
     user = req.body.user,
     role = req.body.role;
+    console.log(req.body);
 
   //Note: The actual *ISP* and *region* information should be retrieved from the *req* object and filled in the following 'preference' data.
   var preference = {isp: 'isp', region: 'region'};
   icsREST.API.createToken(room, user, role, preference, function(token) {
     res.send(token);
+    console.log(token);
   }, function(err) {
     res.status(401).send(err);
   });

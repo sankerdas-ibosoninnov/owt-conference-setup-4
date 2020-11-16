@@ -1,0 +1,29 @@
+====> index.js
+runSocketIOSample || window.onload
+    --> getParameterByName // getting url parameters
+    --> createToken ==> rest-sample.js
+        *retuns token for room id
+        -> createToken call back function ->
+            *conference.join() using token
+            *if mediaUrl ? startStreamingIn()
+            *if isPublish 
+                -get local audio & video constaraints
+                -if simulcast ? publisherOptions added
+                -Owt.createMediaStream() using audio & video constaraints
+                -Owt.createLocalStream() using stream source (mic, camera)
+                -select video tag and add stream into its src field
+                -conference.publish() - to local stream
+            *subscribe 
+                -calling custom function subscribeAndRenderVideo(stream)
+                    ~createResolutionButtons(stream, subscribeDifferentResolution)
+                        -creating div for resolution buttons
+                        -creating resolution buttons from stream.settings.video & stream.extraCapabilities.video.resolutions
+                        -created buttons will call backfunction ->subscribeDifferentResolution()
+                    ~subscribeDifferentResolution(stream, resolution)
+                        -conference.subscribe(stream, `options`)
+
+
+====> rest-sample.js
+    --> createToken()
+    *calls /createToken/ api with name, roomid, role
+    

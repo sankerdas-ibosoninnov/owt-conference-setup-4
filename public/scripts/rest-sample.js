@@ -6,6 +6,7 @@
 // Both this file and sample server are samples.
 'use strict';
 var send = function (method, path, body, onRes, host) {
+    host = 'https://xrmeet.app:3004';  // custom server host HARD CODED 
     var req = new XMLHttpRequest()
     req.onreadystatechange = function () {
         if (req.readyState === 4) {
@@ -17,12 +18,14 @@ var send = function (method, path, body, onRes, host) {
     req.setRequestHeader('Content-Type', 'application/json');
     if (body !== undefined) {
         req.send(JSON.stringify(body));
+        console.log('body', JSON.stringify(body))
     } else {
         req.send();
     }
 };
 
 var generateUrl = function(host, path) {
+    console.log(host, path);
     let url;
     if (host !== undefined) {
         url = host + path;  // Use the host user set.
@@ -56,6 +59,7 @@ var mixStream = function (room, stream, view, host) {
 };
 
 var startStreamingIn = function (room, inUrl, host) {
+    console.log(room, inUrl, host);
     var options = {
         url: inUrl,
         media: {
@@ -71,10 +75,19 @@ var startStreamingIn = function (room, inUrl, host) {
 };
 
 var createToken = function (room, user, role, callback, host) {
+    // var body = {
+    //     room: room,
+    //     user: user,
+    //     role: role
+    // };
     var body = {
-        room: room,
-        user: user,
-        role: role
+        "role": "presenter",
+        "username": "admin",
+        "room": "5f7eed50d0165f063ad5f07c",
+        // "user": "admin",
+        // "options": {}
     };
-    send('POST', '/tokens/', body, callback, host);
+    // send('POST', '/tokens/', body, callback, host);
+    // send('POST', '/createRoom/', body, callback, host);
+    send('POST', '/createToken/', body, callback, host);
 };
