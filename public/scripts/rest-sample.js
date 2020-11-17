@@ -49,6 +49,7 @@ var onResponse = function (result) {
 };
 
 var mixStream = function (room, stream, view, host) {
+    console.log('mixStream')
     var jsonPatch = [{
         op: 'add',
         path: '/info/inViews',

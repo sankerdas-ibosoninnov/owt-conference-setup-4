@@ -99,6 +99,7 @@ const runSocketIOSample = function() {
         return $p;
     }
     function subscribeAndRenderVideo(stream){
+        console.log('subscribeAndRenderVideo');
         let subscirptionLocal=null;
         function subscribeDifferentResolution(stream, resolution){
             subscirptionLocal && subscirptionLocal.stop();
@@ -117,6 +118,7 @@ const runSocketIOSample = function() {
         let $p = createResolutionButtons(stream, subscribeDifferentResolution);
         conference.subscribe(stream)
         .then((subscription)=>{
+            console.log('Subscribe function')
             subscirptionLocal = subscription;
             let $video = $(`<video controls autoplay id=${stream.id} style="display:block" >this browser does not supported video tag</video>`);
            $video.get(0).srcObject = stream.mediaStream;
@@ -137,10 +139,32 @@ const runSocketIOSample = function() {
         $(`#${id}`).remove();
     }
 
+
+    function subscribeToStream(stream){
+        console.log('subscribeToStream');
+        let subscirptionLocal=null;
+            subscirptionLocal && subscirptionLocal.stop();
+            subscirptionLocal = null;
+            const videoOptions = {};
+            // videoOptions.resolution = resolution;
+            conference.subscribe(stream, {
+                audio: true,
+                video: videoOptions
+            }).then((
+                subscription) => {
+                    subscirptionLocal = subscription;
+                    let $video = $(`<video controls autoplay id=${stream.id} style="display:block" >this browser does not supported video tag</video>`);
+                    $video.get(0).srcObject = stream.mediaStream;
+                    $video.appendTo($('body'));
+            }, (err)=>{ console.log('subscribe failed', err); });
+    }
+
+
     conference.addEventListener('streamadded', (event) => {
         console.log('A new stream is added ', event.stream.id);
         isSelf = isSelf?isSelf:event.stream.id != publicationGlobal.id;
         subscribeForward && isSelf && subscribeAndRenderVideo(event.stream);
+        subscribeToStream(event.stream);
         mixStream(myRoom, event.stream.id, 'common');
         event.stream.addEventListener('ended', () => {
             console.log(event.stream.id + ' is ended.');
@@ -195,7 +219,7 @@ const runSocketIOSample = function() {
                         $('.local video').get(0).srcObject = stream;
                         console.log(mediaStream, localStream);
                         conference.publish(localStream, publishOption, codecs).then(publication => {
-                            console.log('pubbbbbbbbbbbbbb')
+                            console.log('Publish function')
                             publicationGlobal = publication;
                             mixStream(myRoom, publication.id, 'common')
                             publication.addEventListener('error', (err) => {
@@ -211,6 +235,7 @@ const runSocketIOSample = function() {
                     });
                 }
                 var streams = resp.remoteStreams;
+                console.log('streams', streams);
                 for (const stream of streams) {
                     console.log('stream loop', stream);
                     if(!subscribeForward){
