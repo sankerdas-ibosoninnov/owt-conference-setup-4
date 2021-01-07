@@ -113,7 +113,7 @@ var pageOption = { page: 1, per_page: 100 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // legacy interface begin
-// /////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
 app.get('/getUsers/:room', function(req, res) {
   var room = req.params.room;
   icsREST.API.getParticipants(room, function(users) {
@@ -135,6 +135,7 @@ app.post('/createToken/', function(req, res) {
   }, function(err) {
     res.send(err);
   });
+  console.log(icsREST.API);
 });
 
 app.post('/createRoom/', function(req, res) {

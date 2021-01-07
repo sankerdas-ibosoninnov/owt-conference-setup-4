@@ -6,7 +6,7 @@
 // Both this file and sample server are samples.
 'use strict';
 var send = function (method, path, body, onRes, host) {
-    host = 'https://xrmeet.app:3004';  // custom server host HARD CODED 
+    // host = 'https://xrmeet.app:3004';  // custom server host HARD CODED 
     var req = new XMLHttpRequest()
     req.onreadystatechange = function () {
         if (req.readyState === 4) {
