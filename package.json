@@ -13,11 +13,13 @@
     "mcu"
   ],
   "dependencies": {
+    "axios": "^0.21.1",
     "body-parser": "~1.14.1",
     "errorhandler": "",
     "express": "",
     "morgan": "",
-    "socket.io": "^2.2.0",
+    "request": "^2.88.2",
+    "socket.io": "^2.4.1",
     "spdy": ""
   },
   "engines": {

@@ -135,7 +135,6 @@ app.post('/createToken/', function(req, res) {
   }, function(err) {
     res.send(err);
   });
-  console.log(icsREST.API);
 });
 
 app.post('/createRoom/', function(req, res) {
@@ -541,33 +540,87 @@ app.post('/tokens', function(req, res) {
 // New RESTful interface end
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+var plain_sever = app.listen(3001);
+var socket = require('socket.io');
+var request = require('request');
 
-spdy.createServer({
-  spdy: {
-    plain: true
-  }
-}, app).listen(3001, (err) => {
-  if (err) {
-    console.log('Failed to setup plain server, ', err);
-    return process.exit(1);
-  }
+var plain_io = socket(plain_sever);
+  
+plain_io.sockets.on('connection', function (socket) {
+  let queryParam = socket.request._query;
+  console.log(queryParam);
+  socket.on('disconnect', function () {
+      console.log('Disconnected,..! '+queryParam.roomID);
+      var formData = { room_id: '5fb8d359fc9f8d4534d6ebcf',vsm_end_time: queryParam.sTime, vsm_end_time: Date.now(), intel_event: 'connectionDestroyed'};
+      request.post({
+        headers: {'content-type' : 'application/x-www-form-urlencoded'},
+        url:     'https://xrmeet.ibosoninnov.com/Ar_connect_api/intel_event_listner',
+        form:    formData
+      }, function(error, response, body){
+        console.log(body);
+      });
+  });
 });
 
-var cipher = require('./cipher');
-cipher.unlock(cipher.k, 'cert/.woogeen.keystore', function cb(err, obj) {
-  if (!err) {
-    spdy.createServer({
-      pfx: fs.readFileSync('cert/certificate.pfx'),
-      passphrase: obj.sample
-    }, app).listen(3004, (error) => {
-      if (error) {
-        console.log('Failed to setup secured server: ', error);
-        return process.exit(1);
-      }
-    });
-  }
-  if (err) {
-    console.error('Failed to setup secured server:', err);
-    return process.exit();
-  }
-});
+
+// secure connection
+var privateKey = fs.readFileSync( 'cert/key.pem' );
+var certificate = fs.readFileSync( 'cert/cert.pem' );
+// var privateKey = fs.readFileSync('cert/.woogeen.keystore');
+// var certificate = fs.readFileSync('cert/certificate.pfx');
+
+var secu_server = https.createServer({
+              key: privateKey,
+              cert: certificate
+          }, app).listen(3004);
+
+var secu_io = socket(secu_server);
+
+
+// const httpsOptions = {
+//   key: fs.readFileSync(path.resolve(dirname, 'cert/key.pem')).toString(),
+//   cert: fs.readFileSync(path.resolve(dirname, 'cert/cert.pem')).toString()
+// };
+
+// const plainServer = require('socket.io').listen(app.listen(3001));
+// const secureServer = require('socket.io').listen(require('https').createServer(httpsOptions, app).listen(3004));
+
+// listen(plainServer);
+// listen(secureServer);
+
+
+
+
+
+// const secureServer = require('socket.io').listen(require('https').createServer(
+//   httpsOptions, app).listen(config.port.secured));
+
+// spdy.createServer({
+//   spdy: {
+//     plain: true
+//   }
+// }, app).listen(3001, (err) => {
+//   if (err) {
+//     console.log('Failed to setup plain server, ', err);
+//     return process.exit(1);
+//   }
+// });
+
+// var cipher = require('./cipher');
+// cipher.unlock(cipher.k, 'cert/.woogeen.keystore', function cb(err, obj) {
+//   if (!err) {
+//     spdy.createServer({
+//       pfx: fs.readFileSync('cert/certificate.pfx'),
+//       passphrase: obj.sample
+//     }, app).listen(3004, (error) => {
+//       if (error) {
+//         console.log('Failed to setup secured server: ', error);
+//         return process.exit(1);
+//       }
+//     });
+//   }
+//   if (err) {
+//     console.error('Failed to setup secured server:', err);
+//     return process.exit();
+//   }
+// });

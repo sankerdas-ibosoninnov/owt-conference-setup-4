@@ -29,6 +29,8 @@
 'use strict';
 var conference;
 var publicationGlobal;
+var socket;
+
 const runSocketIOSample = function() {
 
     let localStream;
@@ -182,9 +184,10 @@ const runSocketIOSample = function() {
         createToken(myRoom, 'user', 'presenter', function(response) {
             var token = response;
             conference.join(token).then(resp => {
-                console.log('conference.join(token)')
+                console.log('conference.join(token)');
                 myId = resp.self.id;
                 myRoom = resp.id;
+                socket = io.connect('http://localhost:3001', { query: {roomID: myRoom, sTime: Date.now() } });
                 if(mediaUrl){
                      startStreamingIn(myRoom, mediaUrl);
                 }
@@ -219,7 +222,8 @@ const runSocketIOSample = function() {
                         $('.local video').get(0).srcObject = stream;
                         console.log(mediaStream, localStream);
                         conference.publish(localStream, publishOption, codecs).then(publication => {
-                            console.log('Publish function')
+                            console.log('Publish function');
+                            startRecordingSes(myRoom);
                             publicationGlobal = publication;
                             mixStream(myRoom, publication.id, 'common')
                             publication.addEventListener('error', (err) => {
@@ -269,6 +273,18 @@ const runSocketIOSample = function() {
         });
     };
 };
+
+$('.endRec').on('click', function (params) {
+    console.log('stop');
+    stopRecordingSes();
+});
+
+$('.showRec').on('click', function (params) {
+    console.log('stop');
+    getRecordingsSes();
+});
+
+
 window.onbeforeunload = function(event){
     conference.leave()
     publicationGlobal.stop();

@@ -14,6 +14,7 @@ var send = function (method, path, body, onRes, host) {
         }
     };
     let url = generateUrl(host, path);
+    console.log(url);
     req.open(method, url, true);
     req.setRequestHeader('Content-Type', 'application/json');
     if (body !== undefined) {
@@ -73,6 +74,53 @@ var startStreamingIn = function (room, inUrl, host) {
         }
     };
     send('POST', '/rooms/' + room + '/streaming-ins', options, onResponse, host);
+};
+
+
+let recID;
+let roomID;
+var startRecordingSes = function (room, host) {
+    roomID = room;
+    console.log(room, host);
+    var options = {
+        container: 'mkv',
+        media: {
+            audio: {
+                from: room+'-common'
+            },
+            video: {
+                from: room+'-common',
+                parameters: {
+                  keyFrameInterval: 2
+                }
+            }
+        }
+    };
+    send('POST', '/rooms/' + room + '/recordings', options, function(recordingRtn) {
+        var result = JSON.parse(recordingRtn);
+        recID = result.id;
+        console.log(recordingRtn, recID);
+    }, host);
+};
+
+
+var stopRecordingSes = function(room, id, callback, callbackError) {
+    // if (typeof id !== 'string' || id.trim().length === 0) {
+    //   return callbackError('Invalid recording ID');
+    // }
+    send('DELETE', '/rooms/' + roomID + '/recordings/' + recID, undefined, function(result) {
+    //   callback(result);
+      console.log(result);
+    }, callbackError);
+  };
+
+
+var getRecordingsSes = function(room, callback, callbackError) {
+    send('GET', '/rooms/' + roomID + '/recordings/', undefined, function(recordingList) {
+      var result = JSON.parse(recordingList);
+      console.log(result);
+    //   callback(result);
+    }, callbackError);
 };
 
 var createToken = function (room, user, role, callback, host) {
