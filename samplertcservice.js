@@ -540,27 +540,36 @@ app.post('/tokens', function(req, res) {
 // New RESTful interface end
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-var plain_sever = app.listen(3001);
+var pSever = app.listen(3001);
 var socket = require('socket.io');
 var request = require('request');
 
-var plain_io = socket(plain_sever);
+var pio = socket(pSever);
   
-plain_io.sockets.on('connection', function (socket) {
-  let queryParam = socket.request._query;
-  console.log(queryParam);
-  socket.on('disconnect', function () {
-      console.log('Disconnected,..! '+queryParam.roomID);
-      var formData = { room_id: '5fb8d359fc9f8d4534d6ebcf',vsm_end_time: queryParam.sTime, vsm_end_time: Date.now(), intel_event: 'connectionDestroyed'};
-      request.post({
-        headers: {'content-type' : 'application/x-www-form-urlencoded'},
-        url:     'https://xrmeet.ibosoninnov.com/Ar_connect_api/intel_event_listner',
-        form:    formData
-      }, function(error, response, body){
-        console.log(body);
-      });
-  });
-});
+// pio.sockets.on('connection', function (socket) {
+//   queryParams = socket.request._query;
+//   console.log(queryParams);
+
+//   socket.on('disconnect', function () {
+//     var formData = { room_id: '5fb8d359fc9f8d4534d6ebcf',vsm_start_time: queryParams.sTime, vsm_end_time: Date.now(), intel_event: 'connectionDestroyed'};
+//     var auth = 'Basic ' + Buffer.from('unitear_dev:tQYoO1bqdOlQEI4').toString('base64');
+//     console.log(auth);
+//     request.post({
+//       headers: {
+//         'content-type' : 'application/x-www-form-urlencoded',
+//         'Authorization' : auth
+//       },
+//       url: 'https://xrmeet.ibosoninnov.com/Ar_connect_api/intel_event_listner',
+//       form: formData
+//     }, function(error, response, body){
+//       console.log(body);
+//       if(error){
+//         console.log(error);
+//       }
+//     });
+//     console.log('Disconnected,..! '+queryParams.userID);
+//   });
+// });
 
 
 // secure connection
@@ -569,25 +578,37 @@ var certificate = fs.readFileSync( 'cert/cert.pem' );
 // var privateKey = fs.readFileSync('cert/.woogeen.keystore');
 // var certificate = fs.readFileSync('cert/certificate.pfx');
 
-var secu_server = https.createServer({
+var sServer = https.createServer({
               key: privateKey,
               cert: certificate
           }, app).listen(3004);
 
-var secu_io = socket(secu_server);
+var sio = socket(sServer);
 
+sio.sockets.on('connection', function (socket) {
+  var queryParams = socket.request._query;
+  console.log(queryParams);
 
-// const httpsOptions = {
-//   key: fs.readFileSync(path.resolve(dirname, 'cert/key.pem')).toString(),
-//   cert: fs.readFileSync(path.resolve(dirname, 'cert/cert.pem')).toString()
-// };
-
-// const plainServer = require('socket.io').listen(app.listen(3001));
-// const secureServer = require('socket.io').listen(require('https').createServer(httpsOptions, app).listen(3004));
-
-// listen(plainServer);
-// listen(secureServer);
-
+  socket.on('disconnect', function () {
+    var formData = { room_id: '5fb8d359fc9f8d4534d6ebcf',vsm_start_time: queryParams.sTime, vsm_end_time: Date.now(), intel_event: 'connectionDestroyed'};
+    var auth = 'Basic ' + Buffer.from('unitear_dev:tQYoO1bqdOlQEI4').toString('base64');
+    console.log(auth);
+    request.post({
+      headers: {
+        'content-type' : 'application/x-www-form-urlencoded',
+        'Authorization' : auth
+      },
+      url: 'https://xrmeet.ibosoninnov.com/Ar_connect_api/intel_event_listner',
+      form: formData
+    }, function(error, response, body){
+      console.log(body);
+      if(error){
+        console.log(error);
+      }
+    });
+    console.log('Disconnected,..! '+queryParams.userID);
+  });
+});
 
 
 

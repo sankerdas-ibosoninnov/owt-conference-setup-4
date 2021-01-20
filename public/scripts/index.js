@@ -176,7 +176,7 @@ const runSocketIOSample = function() {
 
     window.onload = function() {
         var simulcast = getParameterByName('simulcast') || false; // true;
-        var shareScreen = getParameterByName('screen') || false;
+        var shareScreen = getParameterByName('screen') || true;
         myRoom = getParameterByName('room');
         var isHttps = (location.protocol === 'https:');
         var mediaUrl = getParameterByName('url');
