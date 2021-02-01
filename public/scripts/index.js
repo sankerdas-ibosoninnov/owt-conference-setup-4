@@ -176,7 +176,7 @@ const runSocketIOSample = function() {
 
     window.onload = function() {
         var simulcast = getParameterByName('simulcast') || false; // true;
-        var shareScreen = getParameterByName('screen') || true;
+        var shareScreen = getParameterByName('screen') || false;
         myRoom = getParameterByName('room');
         var isHttps = (location.protocol === 'https:');
         var mediaUrl = getParameterByName('url');
@@ -187,7 +187,9 @@ const runSocketIOSample = function() {
                 console.log('conference.join(token)');
                 myId = resp.self.id;
                 myRoom = resp.id;
-                socket = io.connect('http://localhost:3001', { query: {roomID: myRoom, sTime: Date.now() } });
+                // socket = io.connect('http://localhost:3001', { query: {roomID: myRoom, sTime: Date.now() } });
+                socket = io.connect('https://localhost:3004', { query: {roomID: myRoom, sTime: Date.now() } });
+                console.log(socket);
                 if(mediaUrl){
                      startStreamingIn(myRoom, mediaUrl);
                 }
@@ -223,7 +225,7 @@ const runSocketIOSample = function() {
                         console.log(mediaStream, localStream);
                         conference.publish(localStream, publishOption, codecs).then(publication => {
                             console.log('Publish function');
-                            startRecordingSes(myRoom);
+                            // startRecordingSes(myRoom);
                             publicationGlobal = publication;
                             mixStream(myRoom, publication.id, 'common')
                             publication.addEventListener('error', (err) => {

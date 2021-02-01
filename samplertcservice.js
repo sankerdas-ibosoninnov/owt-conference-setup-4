@@ -573,15 +573,18 @@ var pio = socket(pSever);
 
 
 // secure connection
-var privateKey = fs.readFileSync( 'cert/key.pem' );
-var certificate = fs.readFileSync( 'cert/cert.pem' );
+// var privateKey = fs.readFileSync( 'cert/key.pem' );
+// var certificate = fs.readFileSync( 'cert/cert.pem' );
 // var privateKey = fs.readFileSync('cert/.woogeen.keystore');
 // var certificate = fs.readFileSync('cert/certificate.pfx');
+var pfxFile = fs.readFileSync('cert/certificate.pfx');
+
 
 var sServer = https.createServer({
-              key: privateKey,
-              cert: certificate
-          }, app).listen(3004);
+  // key: privateKey,
+  // cert: certificate
+  pfx: pfxFile
+}, app).listen(3004);
 
 var sio = socket(sServer);
 
