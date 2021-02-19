@@ -593,7 +593,7 @@ sio.sockets.on('connection', function (socket) {
   console.log(queryParams);
 
   socket.on('disconnect', function () {
-    var formData = { room_id: '5fb8d359fc9f8d4534d6ebcf',vsm_start_time: queryParams.sTime, vsm_end_time: Date.now(), intel_event: 'connectionDestroyed'};
+    var formData = { room_id: queryParams.roomID, vsm_start_time: queryParams.sTime, vsm_end_time: Date.now(), intel_event: 'connectionDestroyed'};
     var auth = 'Basic ' + Buffer.from('unitear_dev:tQYoO1bqdOlQEI4').toString('base64');
     console.log(auth);
     request.post({

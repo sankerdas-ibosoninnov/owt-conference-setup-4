@@ -186,7 +186,7 @@ const runSocketIOSample = function() {
             conference.join(token).then(resp => {
                 console.log('conference.join(token)');
                 myId = resp.self.id;
-                myRoom = resp.id;
+                myRoom = '6017c7d70439791264e7d6bd';
                 // socket = io.connect('http://localhost:3001', { query: {roomID: myRoom, sTime: Date.now() } });
                 socket = io.connect('https://localhost:3004', { query: {roomID: myRoom, sTime: Date.now() } });
                 console.log(socket);
