@@ -143,7 +143,7 @@ const runSocketIOSample = function() {
 
 
     function subscribeToStream(stream){
-        console.log('subscribeToStream');
+        console.log('subscribeToStream', stream);
         let subscirptionLocal=null;
             subscirptionLocal && subscirptionLocal.stop();
             subscirptionLocal = null;
@@ -173,7 +173,7 @@ const runSocketIOSample = function() {
         });
     });
 
-
+    var newStream;
     window.onload = function() {
         var simulcast = getParameterByName('simulcast') || false; // true;
         var shareScreen = getParameterByName('screen') || false;
@@ -205,24 +205,28 @@ const runSocketIOSample = function() {
                         videoConstraints = new Owt.Base.VideoTrackConstraints(Owt.Base.VideoSourceInfo.SCREENCAST);
                     }
 
+                    var p5canvasStream = document.querySelector("#canvasPublisher canvas").captureStream();
+
                     let mediaStream;
                     Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(
                         audioConstraints, videoConstraints)).then(stream => {
                         let publishOption;
                         if (true) {
-                            publishOption = {video:[
-                                {rid: 'q', active: true, scaleResolutionDownBy: 4.0},
-                                {rid: 'h', active: true, scaleResolutionDownBy: 2.0},
-                                {rid: 'f', active: true, scaleResolutionDownBy: 1.0}
-                            ]};
+                            publishOption = {
+                                video:[
+                                    {rid: 'q', active: true, scaleResolutionDownBy: 4.0},
+                                    {rid: 'h', active: true, scaleResolutionDownBy: 2.0},
+                                    {rid: 'f', active: true, scaleResolutionDownBy: 1.0}
+                                ],
+                                audio: true
+                            };
                         }
-                        mediaStream = stream;
+                        // newStream = new MediaStream(p5canvasStream.getVideoTracks(), stream.getAudioTracks()[0]);
+                        p5canvasStream.addTrack(stream.getAudioTracks()[0]);
                         const codecs = ['vp8', 'h264'];
                         localStream = new Owt.Base.LocalStream(
-                            mediaStream, new Owt.Base.StreamSourceInfo(
-                                'mic', 'camera'));
-                        $('.local video').get(0).srcObject = stream;
-                        console.log(mediaStream, localStream);
+                            p5canvasStream, new Owt.Base.StreamSourceInfo('mic', 'camera') );
+                        $('.local video').get(0).srcObject = p5canvasStream;
                         conference.publish(localStream, publishOption, codecs).then(publication => {
                             console.log('Publish function');
                             // startRecordingSes(myRoom);
@@ -285,6 +289,32 @@ $('.showRec').on('click', function (params) {
     console.log('stop');
     getRecordingsSes();
 });
+
+let canvVideoCapture
+let p5Mic;
+let fft;
+let sketch = function(p) {
+
+p.setup = function() {
+        p.createCanvas(500, 400);
+        p.background(0, 0, 0, 0);
+        p.fill(0, 102);
+        canvVideoCapture = p.createCapture(p.VIDEO);
+        canvVideoCapture.size(320, 240);
+};
+
+p.draw = function() {
+    p.image(canvVideoCapture, 0, 0, 320, 240);
+    p.fill('red');
+    p.rect(30, 30, 50, 50);
+
+    if(p.mouseIsPressed){
+        p.rect(p.mouseX, p.mouseY, 50, 50);
+    }
+};
+
+};
+new p5(sketch, 'canvasPublisher');
 
 
 window.onbeforeunload = function(event){
