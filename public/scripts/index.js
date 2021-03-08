@@ -293,6 +293,7 @@ $('.showRec').on('click', function (params) {
 let canvVideoCapture
 let p5Mic;
 let fft;
+// var testVideo = $('#testVideo');
 let sketch = function(p) {
 
 p.setup = function() {
